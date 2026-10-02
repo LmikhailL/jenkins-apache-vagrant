@@ -1,0 +1,24 @@
+# Jenkins runs in a container so nothing is installed on the host.
+#   docker compose up -d --build      -> http://localhost:8090
+#   docker compose down -v            -> removes Jenkins completely
+services:
+  jenkins:
+    build: ./jenkins
+    image: local/jenkins-apache:lts
+    container_name: jenkins
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8090:8080"
+    environment:
+      JENKINS_ADMIN_ID: ${JENKINS_ADMIN_ID:-admin}
+      JENKINS_ADMIN_PASSWORD: ${JENKINS_ADMIN_PASSWORD:?set it in .env}
+      GIT_REPO_URL: ${GIT_REPO_URL:?set it in .env}
+    extra_hosts:
+      # Colima: 192.168.5.2 is the macOS host (where Vagrant forwards VM ports)
+      - "host.docker.internal:${HOST_GATEWAY_IP:-host-gateway}"
+    volumes:
+      - jenkins_home:/var/jenkins_home
+      - ./keys/jenkins_deploy:/run/secrets/jenkins_deploy:ro
+
+volumes:
+  jenkins_home:

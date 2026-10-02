@@ -1,0 +1,48 @@
+jenkins:
+  systemMessage: "Jenkins (Docker) - Apache deployment to a Vagrant/VirtualBox VM"
+  numExecutors: 2
+  securityRealm:
+    local:
+      allowsSignup: false
+      users:
+        - id: "${JENKINS_ADMIN_ID}"
+          password: "${JENKINS_ADMIN_PASSWORD}"
+  authorizationStrategy:
+    loggedInUsersCanDoAnything:
+      allowAnonymousRead: false
+
+unclassified:
+  location:
+    url: "http://localhost:8090/"
+
+credentials:
+  system:
+    domainCredentials:
+      - credentials:
+          - basicSSHUserPrivateKey:
+              scope: GLOBAL
+              id: "vm-ssh-key"
+              username: "vagrant"
+              description: "SSH key for the Vagrant Apache VM"
+              privateKeySource:
+                directEntry:
+                  privateKey: "${readFile:/run/secrets/jenkins_deploy}"
+
+jobs:
+  - script: >
+      pipelineJob('apache-deploy') {
+        description('Installs Apache2 on the Vagrant VM, generates fake 4xx/5xx requests and analyses the logs. Jenkinsfile is pulled from GitHub.')
+        properties { disableConcurrentBuilds() }
+        definition {
+          cpsScm {
+            scm {
+              git {
+                remote { url('${GIT_REPO_URL}') }
+                branch('*/main')
+              }
+            }
+            scriptPath('Jenkinsfile')
+            lightweight(true)
+          }
+        }
+      }

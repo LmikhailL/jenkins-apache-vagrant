@@ -1,0 +1,4 @@
+.vagrant/
+keys/
+.env
+*.log
