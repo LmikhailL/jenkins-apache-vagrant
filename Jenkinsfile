@@ -19,6 +19,11 @@ pipeline {
     }
 
     environment {
+        // Explicit mapping: on the very first run of an SCM job, parameters are
+        // not yet exported to the shell environment.
+        VM_HOST      = "${params.VM_HOST}"
+        VM_SSH_PORT  = "${params.VM_SSH_PORT}"
+        VM_HTTP_PORT = "${params.VM_HTTP_PORT}"
         SSH_OPTS = '-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR -o ConnectTimeout=10'
         SITE_URL = "http://${params.VM_HOST}:${params.VM_HTTP_PORT}"
         REPORT   = 'apache-log-report.txt'
