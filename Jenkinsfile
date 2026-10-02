@@ -83,7 +83,7 @@ pipeline {
                             sudo a2dissite -q 000-default || true
                             sudo a2ensite -q lab-site
                             sudo apache2ctl configtest
-                            sudo systemctl reload apache2
+                            sudo systemctl restart apache2   # restart (not reload) so newly enabled modules like cgid start
                             rm -rf /tmp/site /tmp/lab-site.conf /tmp/check_logs.sh
                         '
                     '''
